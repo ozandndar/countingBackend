@@ -18,8 +18,34 @@
     </div>
   </div>
 
+  <script>
+    function number_format(number, decimals, dec_point, thousands_sep) {
+      // Strip all characters but numerical ones.
+      number = (number + '').replace(/[^0-9+\-Ee.]/g, '');
+      var n = !isFinite(+number) ? 0 : +number,
+        prec = !isFinite(+decimals) ? 0 : Math.abs(decimals),
+        sep = (typeof thousands_sep === 'undefined') ? ',' : thousands_sep,
+        dec = (typeof dec_point === 'undefined') ? '.' : dec_point,
+        s = '',
+        toFixedFix = function (n, prec) {
+          var k = Math.pow(10, prec);
+          return '' + Math.round(n * k) / k;
+        };
+      // Fix for IE parseFloat(0.55).toFixed(0) = 0;
+      s = (prec ? toFixedFix(n, prec) : '' + Math.round(n)).split('.');
+      if (s[0].length > 3) {
+        s[0] = s[0].replace(/\B(?=(?:\d{3})+(?!\d))/g, sep);
+      }
+      if ((s[1] || '').length < prec) {
+        s[1] = s[1] || '';
+        s[1] += new Array(prec - s[1].length + 1).join('0');
+      }
+      return s.join(dec);
+    }
+  </script>
+
   <div class="container">
-    <form class="row">
+    <form class="row" id="property-tax">
       <div class="form-group col-md-6">
         <label for="city">Şehir</label>
         <select required class="form-control" id="city">
@@ -119,13 +145,18 @@
       </div>
       <div class="form-group col-md-6">
         <label for="amount">Asgari Rayiç Değeri</label>
-        <input required type="number" class="form-control" id="amount" placeholder="TL cinsinden sayı giriniz...">
+        <!-- <input required type="number" class="form-control" id="amount" placeholder="TL cinsinden sayı giriniz..."> -->
+        <input class="form-control" id="amount" placeholder="TL cinsinden sayı giriniz..." type="number"
+          oninput="document.getElementById('result').innerHTML = number_format(this.value, 0, ',', ',')">
+        <span>Tutar: <b id="result">0</b>₺ </span>
+      </div>
+      <div class="form-group col-md-12">
+        <input type="submit" class="btn btn-primary hesapla" value="Hesapla">
       </div>
     </form>
-    <button type="submit" class="btn btn-primary hesapla">Hesapla</button>
   </div>
 
-  <div class="container mt-5 summary">
+  <div class="container mt-5 your-choise">
     <h4>Seçiminiz</h4>
     <hr>
     <div class="row">
@@ -133,7 +164,7 @@
         Gayrimenkulun Bulunduğu İl
       </div>
       <div class="col-md-7 summary-city">
-        : <strong></strong>
+        : <strong id="choosen-city"></strong>
       </div>
     </div>
     <div class="row">
@@ -141,7 +172,7 @@
         Gayrimenkulun Türü
       </div>
       <div class="col-md-7 summary-type">
-        : <strong></strong>
+        : <strong id="choosen-type"></strong>
       </div>
     </div>
     <div class="row">
@@ -149,12 +180,12 @@
         Gayrimenkulun Asgari Rayiç Değeri
       </div>
       <div class="col-md-7 summary-amount">
-        : <strong></strong>
+        : <strong id="choosen-amount"></strong>
       </div>
     </div>
   </div>
 
-  <div class="container mt-5 table-1">
+  <div class="container mt-5 property-tax">
     <table class="table">
       <thead class="thead-light">
         <tr>
@@ -165,15 +196,15 @@
       </thead>
       <tbody>
         <tr>
-          <td>%0,2</td>
-          <td id="city-status">Büyükşehir Statüsünde Değil</td>
-          <td>20TL</td>
+          <td id="property-tax-rate"></td>
+          <td id="bigcity-status"></td>
+          <td id="property-tax-amount"></td>
         </tr>
       </tbody>
     </table>
   </div>
 
-  <div class="container mt-2 table-2">
+  <div class="container mt-2 culture-pay">
     <table class="table">
       <thead class="thead-light">
         <tr>
@@ -183,14 +214,14 @@
       </thead>
       <tbody>
         <tr>
-          <td>%10</td>
-          <td>200 TL</td>
+          <td id="culture-pay-rate">%10</td>
+          <td id="culture-pay-amount">200 TL</td>
         </tr>
       </tbody>
     </table>
   </div>
 
-  <div class="container mt-2 table-3">
+  <div class="container mt-2 installment-table">
     <table class="table">
       <thead class="thead-light">
         <tr>
@@ -202,23 +233,23 @@
       <tbody>
         <tr>
           <td scope="col">Emlak vergisi 1.Taksit</td>
-          <td>200₺</td>
-          <td>31 MAYIS 2021</td>
+          <td id="property-first-tax-amount"></td>
+          <td id="property-first-tax-date"></td>
         </tr>
         <tr>
           <td scope="col">Emlak vergisi 2.Taksit</td>
-          <td>200₺</td>
-          <td>30 KASIM 2020</td>
+          <td id="property-second-tax-amount"></td>
+          <td id="property-second-tax-date"></td>
         </tr>
         <tr>
           <td scope="col">Kültür Payı 1.Taksit</td>
-          <td>20₺</td>
-          <td>31 MAYIS 2021</td>
+          <td id="culture-pay-first-amount"></td>
+          <td id="culture-pay-first-date"></td>
         </tr>
         <tr>
           <td scope="col">Kültür Payı 2.Taksit</td>
-          <td>20₺</td>
-          <td>30 KASIM 2020</td>
+          <td id="culture-pay-second-amount"></td>
+          <td id="culture-pay-second-date"></td>
         </tr>
       </tbody>
     </table>
